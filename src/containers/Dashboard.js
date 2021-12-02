@@ -32,8 +32,8 @@ export const card = (bill) => {
     firstAndLastNames.split('.')[0] : ''
   const lastName = firstAndLastNames.includes('.') ?
   firstAndLastNames.split('.')[1] : firstAndLastNames
-
-  return (`
+  if(bill.date !== '' && bill.date.substr(0,4) > 1969){
+    return (`
     <div class='bill-card' id='open-bill${bill.id}' data-testid='open-bill${bill.id}'>
       <div class='bill-card-name-container'>
         <div class='bill-card-name'> ${firstName} ${lastName} </div>
@@ -49,6 +49,8 @@ export const card = (bill) => {
       </div>
     </div>
   `)
+  }
+  return ('')
 }
 
 export const cards = (bills) => {
@@ -145,9 +147,15 @@ export default class {
       this.counter ++
     }
 
-    bills.forEach(bill => {
+    /* bills.forEach(bill => {
       $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
-    })
+    }) */
+
+    filteredBills(bills, getStatus(this.index)).forEach((bill) => {
+        $(`#open-bill${bill.id}`).click((e) =>
+          this.handleEditTicket(e, bill, bills)
+        )
+      })
 
     return bills
 

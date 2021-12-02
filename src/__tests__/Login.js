@@ -169,7 +169,7 @@ describe("Given that I am a user on login page", () => {
       const inputPasswordUser = screen.getByTestId("admin-password-input")
       fireEvent.change(inputPasswordUser, { target: { value: inputData.password } })
       expect(inputPasswordUser.value).toBe(inputData.password)
-
+      
       const form = screen.getByTestId("form-admin")
       
       // localStorage should be populated with form data
