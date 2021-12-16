@@ -56,7 +56,9 @@ export default () => {
                   <div class="col-half">
                     <label for="file" class="bold-label">Justificatif</label>
                     <input required type="file" class="form-control blue-border" data-testid="file" />
-                    <p data-testid="extension-error" id="extension-error" >Le format du fichier n'est pas accepté, veuillez corriger.</P>
+                    <div data-testid="extension-error" id="extension-error">
+                        <p>Le format du fichier n'est pas accepté, veuillez corriger.</p>
+                    </div>
                   </div>
                 </div>
             </div>

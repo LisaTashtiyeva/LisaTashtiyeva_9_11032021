@@ -36,8 +36,7 @@ describe("Given I am connected as an employee", () => {
                 const submitBtn = screen.getByTestId("form-new-bill")
                 submitBtn.addEventListener("submit", handleSubmit)
                 fireEvent.submit(submitBtn)
-                expect(handleSubmit).toHaveBeenCalled()
-                expect(document.querySelector("#extension-error").style.display).toBe("block")
+                expect(handleSubmit).toHaveBeenCalled()                
             })
         })
 
@@ -50,10 +49,19 @@ describe("Given I am connected as an employee", () => {
                         type: 'image/png',
                     }),
                 }
+                const onNavigate = (pathname) => {
+                    document.body.innerHTML = ROUTES({pathname})
+                }
+                console.log('firestore' , firestore.storage)
                 const newBill = new NewBill({
-                    document,
+                    document, onNavigate, firestore: firestore, localStorage: window.localStorage
                 })
-                userEvent.upload(inputFile, inputData.file)
+                const handleChangeFile = jest.fn(() => newBill.handleChangeFile)
+                inputFile.addEventListener('change', handleChangeFile)
+                //userEvent.upload(inputFile, inputData.file)
+                fireEvent.change(inputFile, {
+                    target : {files : [inputData.file]}
+                })
                 expect(inputFile.files[0]).toStrictEqual(inputData.file)
                 expect(document.querySelector("#extension-error").style.display).toBe("none")
             })
@@ -65,7 +73,7 @@ describe("Given I am connected as an employee", () => {
                     document.body.innerHTML = ROUTES({pathname})
                 }
                 const newBill = new NewBill({document, onNavigate, firestore: firestore, localStorage: window.localStorage})
-                const handleChangeFile = jest.fn(() => newBill.handleChangeFile)
+                const handleChangeFile = jest.fn(newBill.handleChangeFile)
                 const inputFile = screen.getByTestId('file')
                 const inputData = {
                     target : {
@@ -76,6 +84,29 @@ describe("Given I am connected as an employee", () => {
                 fireEvent.change(inputFile, inputData)
                 expect(handleChangeFile).toHaveBeenCalled()
                 expect(inputFile.files[0].name).toBe('test.png')
+                
+            })
+            
+        })
+
+        describe('When I upload a wrong file format', () => {
+            test ('Then a error message should appear', () => {
+                document.body.innerHTML = NewBillUI()
+                setLocalStorage('employee')
+                const onNavigate = (pathname) => {
+                    document.body.innerHTML = ROUTES({pathname})
+                }
+                const newBill = new NewBill({document, onNavigate, firestore: firestore, localStorage: window.localStorage})
+                const handleChangeFile = jest.fn(() => newBill.handleChangeFile)
+                const inputFile = screen.getByTestId('file')
+                const inputData = {
+                    target : {
+                        files: [new File(['test.pdf'], 'test.pdf', { type: 'application/pdf' })],
+                    }
+                }
+                inputFile.addEventListener('change', handleChangeFile)
+                fireEvent.change(inputFile, inputData)
+                expect(document.querySelector("#extension-error").style.display).toBe("block")
             })
         })
     })

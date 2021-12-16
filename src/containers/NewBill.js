@@ -18,13 +18,14 @@ export default class NewBill {
   handleChangeFile = e => {
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)
-    const fileName = filePath[filePath.length-1]
-    const errorMessage = this.document.getElementById("extension-error");
+    const fileName = filePath[filePath.length-1]  || e.target.files[0].name
+    const errorMessage = document.getElementById("extension-error");
 	const extensionCheck = /(png|jpg|jpeg)/g
     const extension = fileName.split(".").pop().toLowerCase()
-
+    errorMessage.style.display = "none";
+    console.log('fileName' , e.target.files[0].name)
+    console.log('check' , extension.match(extensionCheck))
 	if(extension.match(extensionCheck)){
-        errorMessage.style.display = "none"
 		this.firestore
 		.storage
 		.ref(`justificatifs/${fileName}`)
@@ -43,7 +44,7 @@ export default class NewBill {
 
   handleSubmit = e => {
     e.preventDefault()
-    console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
+   // console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
     const email = JSON.parse(localStorage.getItem("user")).email
     const bill = {
       email,
