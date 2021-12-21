@@ -19,17 +19,15 @@ describe("Given I am connected as an employee", () => {
 
         describe("When I upload a file with the wrong format", () => {
             test("Then the bill shouldn't be created", () => {
+                document.body.innerHTML = NewBillUI()
                 const onNavigate = (pathname) => {
                     document.body.innerHTML = ROUTES({ pathname })
                 }
                 Object.defineProperty(window, "localStorage", {
                     value: localStorageMock,
                 })
-                window.localStorage.setItem("user", JSON.stringify({type: "Employee"}))
+                setLocalStorage('employee')
                 const firestore = null
-                const html = NewBillUI()
-                document.body.innerHTML = html
-        
                 const newBill = new NewBill({document, onNavigate, firestore, localStorage: window.localStorage})
                 const handleSubmit = jest.fn(newBill.handleSubmit)
                 newBill.fileName = "invalid"
@@ -38,59 +36,8 @@ describe("Given I am connected as an employee", () => {
                 fireEvent.submit(submitBtn)
                 expect(handleSubmit).toHaveBeenCalled()                
             })
-        })
 
-        describe('When I upload a correct file', () => {
-            test('Then the name of the file should be present in the input file', () => {
-                document.body.innerHTML = NewBillUI()
-                const inputFile = screen.getByTestId('file')
-                const inputData = {
-                    file: new File(['test'], 'test.png', {
-                        type: 'image/png',
-                    }),
-                }
-                const onNavigate = (pathname) => {
-                    document.body.innerHTML = ROUTES({pathname})
-                }
-                console.log('firestore' , firestore.storage)
-                const newBill = new NewBill({
-                    document, onNavigate, firestore: firestore, localStorage: window.localStorage
-                })
-                const handleChangeFile = jest.fn(() => newBill.handleChangeFile)
-                inputFile.addEventListener('change', handleChangeFile)
-                //userEvent.upload(inputFile, inputData.file)
-                fireEvent.change(inputFile, {
-                    target : {files : [inputData.file]}
-                })
-                expect(inputFile.files[0]).toStrictEqual(inputData.file)
-                expect(document.querySelector("#extension-error").style.display).toBe("none")
-            })
-            
-            test('Then the file handler should be called', () => {
-                document.body.innerHTML = NewBillUI()
-                setLocalStorage('employee')
-                const onNavigate = (pathname) => {
-                    document.body.innerHTML = ROUTES({pathname})
-                }
-                const newBill = new NewBill({document, onNavigate, firestore: firestore, localStorage: window.localStorage})
-                const handleChangeFile = jest.fn(newBill.handleChangeFile)
-                const inputFile = screen.getByTestId('file')
-                const inputData = {
-                    target : {
-                        files: [new File(['test.png'], 'test.png', { type: 'image/png' })],
-                    }
-                }
-                inputFile.addEventListener('change', handleChangeFile)
-                fireEvent.change(inputFile, inputData)
-                expect(handleChangeFile).toHaveBeenCalled()
-                expect(inputFile.files[0].name).toBe('test.png')
-                
-            })
-            
-        })
-
-        describe('When I upload a wrong file format', () => {
-            test ('Then a error message should appear', () => {
+            test ('Then an error message should appear', () => {
                 document.body.innerHTML = NewBillUI()
                 setLocalStorage('employee')
                 const onNavigate = (pathname) => {
@@ -109,7 +56,74 @@ describe("Given I am connected as an employee", () => {
                 expect(document.querySelector("#extension-error").style.display).toBe("block")
             })
         })
+
+        describe('When I upload a correct file', () => {  
+            test('Then the name of the file should be present in the input file', () => {
+                document.body.innerHTML = NewBillUI()
+                const firestore = {
+                    storage: {
+                      ref: jest.fn(() => {
+                        return {
+                          put: jest
+                            .fn()
+                            .mockResolvedValueOnce({ ref: { getDownloadURL: jest.fn() } })
+                        }
+                      })
+                    }
+                }
+                const inputFile = screen.getByTestId('file')
+                const inputData = {
+                    file: new File(['test'], 'test.png', {
+                        type: 'image/png',
+                    }),
+                }
+                const onNavigate = (pathname) => {
+                     document.body.innerHTML = ROUTES({pathname})
+                }
+                const newBill = new NewBill({document, onNavigate, firestore: firestore, localStorage: window.localStorage})
+                const handleChangeFile = jest.fn(() => newBill.handleChangeFile)
+                inputFile.addEventListener('change', handleChangeFile)
+                fireEvent.change(inputFile, {
+                     target : {files : [inputData.file]}
+                })
+                expect(inputFile.files[0]).toStrictEqual(inputData.file)
+                expect(document.querySelector("#extension-error").style.display).toBe("none")
+            })
+            
+            test('Then the file handler should be called', () => {
+                document.body.innerHTML = NewBillUI()
+                setLocalStorage('employee')
+                const firestore = {
+                    storage: {
+                      ref: jest.fn(() => {
+                        return {
+                          put: jest
+                            .fn()
+                            .mockResolvedValueOnce({ ref: { getDownloadURL: jest.fn() } })
+                        }
+                      })
+                    }
+                }
+                const onNavigate = (pathname) => {
+                    document.body.innerHTML = ROUTES({pathname})
+                }
+                const newBill = new NewBill({document, onNavigate, firestore: firestore, localStorage: window.localStorage})
+                const handleChangeFile = jest.fn(newBill.handleChangeFile)
+                const inputFile = screen.getByTestId('file')
+                const inputData = {
+                    target : {
+                        files: [new File(['test.png'], 'test.png', { type: 'image/png' })],
+                    }
+                }
+                inputFile.addEventListener('change', handleChangeFile)
+                fireEvent.change(inputFile, inputData)
+                expect(handleChangeFile).toHaveBeenCalled()
+                expect(inputFile.files[0].name).toBe('test.png')
+                
+            })           
+        })
     })
+    
   // test d'intégration POST
     describe("When I create a new bill", () => {
         test("add bill from mock API POST", async () => {

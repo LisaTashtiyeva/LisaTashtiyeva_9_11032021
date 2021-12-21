@@ -15,16 +15,15 @@ export default class NewBill {
     this.fileName = null
     new Logout({ document, localStorage, onNavigate })
   }
-  handleChangeFile = e => {
+  
+   handleChangeFile = e => {
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]  || e.target.files[0].name
     const errorMessage = document.getElementById("extension-error");
 	const extensionCheck = /(png|jpg|jpeg)/g
     const extension = fileName.split(".").pop().toLowerCase()
-    errorMessage.style.display = "none";
-    console.log('fileName' , e.target.files[0].name)
-    console.log('check' , extension.match(extensionCheck))
+    errorMessage.style.display = "none"; 
 	if(extension.match(extensionCheck)){
 		this.firestore
 		.storage
@@ -37,10 +36,9 @@ export default class NewBill {
 		})
 	} else {
         errorMessage.style.display = "block";
-		//alert("Le format du fichier n'est pas accepté, veuillez corriger.")
 		this.document.querySelector(`input[data-testid="file"]`).value = null
 	}
-  }
+  } 
 
   handleSubmit = e => {
     e.preventDefault()
